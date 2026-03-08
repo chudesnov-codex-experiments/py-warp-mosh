@@ -14,11 +14,23 @@ pip install .
 py-warp-mosh input.png output.png --seed 42
 ```
 
+If no arguments are provided, the app prints `--help` and exits.
+
+Drag-and-drop support (Windows executable/shortcut):
+
+- Drop **one file**: outputs `*_warped_datamosh_bitmap.png` next to the input.
+- Drop **multiple files**: each file is processed with that same default output naming.
+- Optional explicit output for a single input:
+
+```bash
+py-warp-mosh input.png --output output.png
+```
+
 ## Build single-file binaries locally
 
 ```bash
 pip install .[dev]
-pyinstaller --onefile --name py-warp-mosh src/py_warp_mosh/cli.py
+pyinstaller --onefile --name py-warp-mosh -m py_warp_mosh
 ```
 
 ## Restricted package index / proxy environments

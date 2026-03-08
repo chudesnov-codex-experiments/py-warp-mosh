@@ -39,7 +39,7 @@ jobs:
 
       - name: Build onefile executable
         run: |
-          pyinstaller --onefile --name py-warp-mosh src/py_warp_mosh/cli.py
+          pyinstaller --onefile --name py-warp-mosh -m py_warp_mosh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
