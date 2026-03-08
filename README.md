@@ -30,7 +30,7 @@ py-warp-mosh input.png --output output.png
 
 ```bash
 pip install .[dev]
-pyinstaller --onefile --name py-warp-mosh -m py_warp_mosh
+pyinstaller --onefile --name py-warp-mosh scripts/pyinstaller_entrypoint.py
 ```
 
 ## Restricted package index / proxy environments
