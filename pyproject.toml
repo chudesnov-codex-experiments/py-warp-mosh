@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py-warp-mosh"
+version = "0.1.0"
+description = "Cross-platform datamosh-style bitmap warping for images"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "py-warp-mosh contributors" }]
+license = { text = "MIT" }
+dependencies = [
+  "numpy>=1.24",
+  "Pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pyinstaller>=6.0",
+]
+
+[project.scripts]
+py-warp-mosh = "py_warp_mosh.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
