@@ -1,0 +1,63 @@
+name: web-demo
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "web/**"
+      - ".github/workflows/deploy-web-demo.yml"
+  pull_request:
+    paths:
+      - "web/**"
+      - ".github/workflows/deploy-web-demo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-demo-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-preview-artifact:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload PR preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-demo-preview-${{ github.event.pull_request.number }}
+          path: web
+          retention-days: 7
+          if-no-files-found: error
+
+  deploy-pages:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

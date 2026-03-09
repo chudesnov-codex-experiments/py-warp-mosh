@@ -26,6 +26,23 @@ Drag-and-drop support (Windows executable/shortcut):
 py-warp-mosh input.png --output output.png
 ```
 
+
+## Web-friendly version (vanilla JS)
+
+A browser-native implementation lives in `web/` and prioritizes **PNG, JPEG, and GIF** input (with broader format support depending on your browser, e.g. WebP/AVIF where available).
+
+GitHub Pages deployment is automated via `.github/workflows/deploy-web-demo.yml` and publishes the `web/` directory when changes land on `main`.
+
+On pull requests, the same workflow uploads a short-lived CI artifact (`web-demo-preview-<PR_NUMBER>`) so you can open/download it directly from the Actions run in the PR.
+
+After enabling **Settings → Pages → Build and deployment → GitHub Actions**, the demo will be available at:
+
+```text
+https://<org-or-user>.github.io/<repo>/
+```
+
+Use the UI to upload or drag/drop an image, set a seed, apply the effect, and download the result as PNG.
+
 ## Build single-file binaries locally
 
 ```bash
