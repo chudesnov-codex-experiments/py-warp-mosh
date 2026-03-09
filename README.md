@@ -31,11 +31,12 @@ py-warp-mosh input.png --output output.png
 
 A browser-native implementation lives in `web/` and prioritizes **PNG, JPEG, and GIF** input (with broader format support depending on your browser, e.g. WebP/AVIF where available).
 
-Run it locally:
+GitHub Pages deployment is automated via `.github/workflows/deploy-web-demo.yml` and publishes the `web/` directory when changes land on `main`.
 
-```bash
-python -m http.server 8000
-# then open http://localhost:8000/web/
+After enabling **Settings → Pages → Build and deployment → GitHub Actions**, the demo will be available at:
+
+```text
+https://<org-or-user>.github.io/<repo>/
 ```
 
 Use the UI to upload or drag/drop an image, set a seed, apply the effect, and download the result as PNG.
