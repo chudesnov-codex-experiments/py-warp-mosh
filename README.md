@@ -26,6 +26,20 @@ Drag-and-drop support (Windows executable/shortcut):
 py-warp-mosh input.png --output output.png
 ```
 
+
+## Web-friendly version (vanilla JS)
+
+A browser-native implementation lives in `web/` and prioritizes **PNG, JPEG, and GIF** input (with broader format support depending on your browser, e.g. WebP/AVIF where available).
+
+Run it locally:
+
+```bash
+python -m http.server 8000
+# then open http://localhost:8000/web/
+```
+
+Use the UI to upload or drag/drop an image, set a seed, apply the effect, and download the result as PNG.
+
 ## Build single-file binaries locally
 
 ```bash

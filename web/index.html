@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>py-warp-mosh web demo</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, system-ui, sans-serif;
+      }
+      body {
+        margin: 0;
+        background: #101217;
+        color: #f6f7fb;
+      }
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 2rem 1rem 3rem;
+      }
+      .panel {
+        border: 1px solid #2a2f3a;
+        border-radius: 12px;
+        padding: 1rem;
+        background: #171b22;
+      }
+      .row { display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.75rem 0; }
+      canvas { max-width: 100%; border-radius: 8px; background: #0e1014; }
+      label { display: inline-flex; align-items: center; gap: 0.4rem; }
+      button, input[type='file']::file-selector-button {
+        border: 1px solid #3a4251;
+        background: #232a37;
+        color: #fff;
+        border-radius: 8px;
+        padding: 0.45rem 0.8rem;
+      }
+      #drop {
+        border: 2px dashed #3e4659;
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+      }
+      #drop.dragover { border-color: #78a6ff; background: #182333; }
+      .muted { color: #aab2c4; font-size: 0.92rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>py-warp-mosh (web)</h1>
+      <p class="muted">Browser-native implementation in vanilla JS. Best tested with PNG, JPEG, and GIF files.</p>
+      <div class="panel">
+        <div id="drop">Drop an image here (PNG/JPEG/GIF), or use file picker below.</div>
+        <div class="row">
+          <input id="file" type="file" accept="image/png,image/jpeg,image/gif,image/*" />
+          <label>Seed <input id="seed" type="number" value="42" min="0" step="1" /></label>
+          <button id="run" disabled>Apply warp mosh</button>
+          <button id="download" disabled>Download PNG</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 1rem">
+        <div class="panel" style="flex: 1; min-width: 300px">
+          <h3>Input</h3>
+          <canvas id="inputCanvas"></canvas>
+        </div>
+        <div class="panel" style="flex: 1; min-width: 300px">
+          <h3>Output</h3>
+          <canvas id="outputCanvas"></canvas>
+        </div>
+      </div>
+    </main>
+    <script type="module">
+      import { decodeFileToImageBitmap, warpMoshImageData } from './warp-mosh.js';
+
+      const fileInput = document.getElementById('file');
+      const dropZone = document.getElementById('drop');
+      const seedInput = document.getElementById('seed');
+      const runBtn = document.getElementById('run');
+      const downloadBtn = document.getElementById('download');
+      const inputCanvas = document.getElementById('inputCanvas');
+      const outputCanvas = document.getElementById('outputCanvas');
+      const inputCtx = inputCanvas.getContext('2d', { willReadFrequently: true });
+      const outputCtx = outputCanvas.getContext('2d', { willReadFrequently: true });
+
+      let loaded = false;
+
+      async function loadFile(file) {
+        const bmp = await decodeFileToImageBitmap(file);
+        inputCanvas.width = bmp.width;
+        inputCanvas.height = bmp.height;
+        outputCanvas.width = bmp.width;
+        outputCanvas.height = bmp.height;
+        inputCtx.drawImage(bmp, 0, 0);
+        outputCtx.clearRect(0, 0, bmp.width, bmp.height);
+        runBtn.disabled = false;
+        downloadBtn.disabled = true;
+        loaded = true;
+      }
+
+      fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        await loadFile(file);
+      });
+
+      ['dragenter', 'dragover'].forEach((evt) => {
+        dropZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('dragover');
+        });
+      });
+      ['dragleave', 'drop'].forEach((evt) => {
+        dropZone.addEventListener(evt, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('dragover');
+        });
+      });
+      dropZone.addEventListener('drop', async (e) => {
+        const file = e.dataTransfer?.files?.[0];
+        if (!file) return;
+        await loadFile(file);
+      });
+
+      runBtn.addEventListener('click', () => {
+        if (!loaded) return;
+        const seed = Number.parseInt(seedInput.value, 10) || 42;
+        const src = inputCtx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
+        const out = warpMoshImageData(src, { seed });
+        outputCtx.putImageData(out, 0, 0);
+        downloadBtn.disabled = false;
+      });
+
+      downloadBtn.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = outputCanvas.toDataURL('image/png');
+        a.download = 'warped_datamosh_bitmap.png';
+        a.click();
+      });
+    </script>
+  </body>
+</html>
