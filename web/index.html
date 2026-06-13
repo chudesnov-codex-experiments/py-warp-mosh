@@ -6,95 +6,229 @@
     <title>py-warp-mosh web demo</title>
     <style>
       :root {
-        color-scheme: dark;
-        font-family: Inter, system-ui, sans-serif;
+        color-scheme: light dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --bg: #f5f7fb;
+        --text: #161922;
+        --muted: #5d6678;
+        --panel: #ffffff;
+        --panel-soft: #eef2f8;
+        --border: #d7deea;
+        --accent: #2657d8;
+        --accent-strong: #1744b8;
+        --accent-text: #ffffff;
+        --danger: #b3261e;
+        --success: #257a45;
+        --shadow: 0 18px 45px rgb(25 35 55 / 0.12);
       }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #101217;
+          --text: #f6f7fb;
+          --muted: #aab2c4;
+          --panel: #171b22;
+          --panel-soft: #11151c;
+          --border: #2a2f3a;
+          --accent: #78a6ff;
+          --accent-strong: #9dbdff;
+          --accent-text: #0d1424;
+          --danger: #ffb4ab;
+          --success: #8bd59f;
+          --shadow: 0 18px 45px rgb(0 0 0 / 0.28);
+        }
+      }
+
+      * { box-sizing: border-box; }
       body {
         margin: 0;
-        background: #101217;
-        color: #f6f7fb;
+        background:
+          radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 18%, transparent), transparent 34rem),
+          var(--bg);
+        color: var(--text);
       }
       main {
-        max-width: 980px;
+        max-width: 1040px;
         margin: 0 auto;
         padding: 2rem 1rem 3rem;
       }
+      .hero { margin-bottom: 1.25rem; }
+      .hero h1 { margin: 0 0 0.4rem; letter-spacing: -0.03em; }
       .panel {
-        border: 1px solid #2a2f3a;
-        border-radius: 12px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
         padding: 1rem;
-        background: #171b22;
+        background: color-mix(in srgb, var(--panel) 94%, transparent);
+        box-shadow: var(--shadow);
       }
       .row { display: flex; gap: 1rem; flex-wrap: wrap; margin: 0.75rem 0; }
-      canvas { max-width: 100%; border-radius: 8px; background: #0e1014; }
-      label { display: inline-flex; align-items: center; gap: 0.4rem; }
+      .controls { align-items: end; }
+      .field { display: grid; gap: 0.35rem; }
+      .field span { font-size: 0.85rem; color: var(--muted); font-weight: 700; }
+      canvas { max-width: 100%; border-radius: 12px; background: var(--panel-soft); display: block; }
       button, input[type='file']::file-selector-button {
-        border: 1px solid #3a4251;
-        background: #232a37;
-        color: #fff;
-        border-radius: 8px;
-        padding: 0.45rem 0.8rem;
+        border: 1px solid var(--border);
+        background: var(--panel-soft);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 0.65rem 1rem;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:hover, input[type='file']::file-selector-button:hover { border-color: var(--accent); }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-text);
+      }
+      button.primary:hover { background: var(--accent-strong); }
+      input[type='number'] {
+        width: 7rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.58rem 0.7rem;
+        background: var(--panel);
+        color: var(--text);
+        font: inherit;
       }
       #drop {
-        border: 2px dashed #3e4659;
-        padding: 1rem;
-        border-radius: 10px;
+        border: 2px dashed var(--border);
+        padding: 1.25rem;
+        border-radius: 14px;
         text-align: center;
+        background: var(--panel-soft);
       }
-      #drop.dragover { border-color: #78a6ff; background: #182333; }
-      .muted { color: #aab2c4; font-size: 0.92rem; }
+      #drop.dragover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--panel-soft)); }
+      .muted { color: var(--muted); font-size: 0.95rem; }
+      .status {
+        min-height: 1.5rem;
+        margin: 0.5rem 0 0;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .status.error { color: var(--danger); }
+      .status.success { color: var(--success); }
+      .preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem; }
+      .preview-card { display: grid; gap: 0.65rem; }
+      .preview-card h3 { margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+      .badge {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 0.76rem;
+        padding: 0.18rem 0.55rem;
+      }
+      .empty-state {
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        background: var(--panel-soft);
+        color: var(--muted);
+      }
+      .hidden { display: none !important; }
     </style>
   </head>
   <body>
     <main>
-      <h1>py-warp-mosh (web)</h1>
-      <p class="muted">Browser-native implementation in vanilla JS. Best tested with PNG, JPEG, and GIF files.</p>
-      <div class="panel">
-        <div id="drop">Drop an image here (PNG/JPEG/GIF), or use file picker below.</div>
-        <div class="row">
-          <input id="file" type="file" accept="image/png,image/jpeg,image/gif,image/*" />
-          <label>Seed <input id="seed" type="number" value="42" min="0" step="1" /></label>
-          <button id="run" disabled>Apply warp mosh</button>
-          <button id="download" disabled>Download PNG</button>
+      <section class="hero">
+        <h1>py-warp-mosh (web)</h1>
+        <p class="muted">Browser-native implementation in vanilla JS. Pick an image, mosh it, then download the PNG result.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="controls-title">
+        <h2 id="controls-title">Create a warped image</h2>
+        <div id="drop">Drop an image here (PNG/JPEG/GIF), or use the file picker below.</div>
+        <div class="row controls">
+          <label class="field">
+            <span>Image</span>
+            <input id="file" type="file" accept="image/png,image/jpeg,image/gif,image/*" />
+          </label>
+          <label class="field hidden" id="seedField">
+            <span>Seed</span>
+            <input id="seed" type="number" value="42" min="0" step="1" />
+          </label>
+          <button id="run" class="primary hidden" type="button">Start moshing</button>
+          <button id="download" class="hidden" type="button">Download result</button>
         </div>
-      </div>
-      <div class="row" style="margin-top: 1rem">
-        <div class="panel" style="flex: 1; min-width: 300px">
-          <h3>Input</h3>
+        <p id="status" class="status" role="status">Choose an image to get started.</p>
+      </section>
+
+      <section id="emptyPreview" class="empty-state" style="margin-top: 1rem">
+        Your before/after previews will appear after you choose an image.
+      </section>
+
+      <section id="previewGrid" class="preview-grid hidden" aria-label="Image previews">
+        <article class="panel preview-card">
+          <h3>Before <span class="badge" id="inputMeta">Original</span></h3>
           <canvas id="inputCanvas"></canvas>
-        </div>
-        <div class="panel" style="flex: 1; min-width: 300px">
-          <h3>Output</h3>
+        </article>
+        <article id="outputPanel" class="panel preview-card hidden">
+          <h3>After <span class="badge">Warp moshed</span></h3>
           <canvas id="outputCanvas"></canvas>
-        </div>
-      </div>
+        </article>
+      </section>
     </main>
     <script type="module">
       import { decodeFileToImageBitmap, warpMoshImageData } from './warp-mosh.js';
 
       const fileInput = document.getElementById('file');
       const dropZone = document.getElementById('drop');
+      const seedField = document.getElementById('seedField');
       const seedInput = document.getElementById('seed');
       const runBtn = document.getElementById('run');
       const downloadBtn = document.getElementById('download');
+      const status = document.getElementById('status');
+      const emptyPreview = document.getElementById('emptyPreview');
+      const previewGrid = document.getElementById('previewGrid');
+      const outputPanel = document.getElementById('outputPanel');
+      const inputMeta = document.getElementById('inputMeta');
       const inputCanvas = document.getElementById('inputCanvas');
       const outputCanvas = document.getElementById('outputCanvas');
       const inputCtx = inputCanvas.getContext('2d', { willReadFrequently: true });
       const outputCtx = outputCanvas.getContext('2d', { willReadFrequently: true });
 
       let loaded = false;
+      let moshed = false;
+
+      function setStatus(message, tone = '') {
+        status.textContent = message;
+        status.className = `status ${tone}`.trim();
+      }
+
+      function showReadyState(file, bmp) {
+        loaded = true;
+        moshed = false;
+        seedField.classList.remove('hidden');
+        runBtn.classList.remove('hidden');
+        downloadBtn.classList.add('hidden');
+        emptyPreview.classList.add('hidden');
+        previewGrid.classList.remove('hidden');
+        outputPanel.classList.add('hidden');
+        inputMeta.textContent = `${bmp.width} × ${bmp.height}`;
+        setStatus(`${file.name} is ready. Adjust the seed or start moshing.`, 'success');
+      }
 
       async function loadFile(file) {
-        const bmp = await decodeFileToImageBitmap(file);
-        inputCanvas.width = bmp.width;
-        inputCanvas.height = bmp.height;
-        outputCanvas.width = bmp.width;
-        outputCanvas.height = bmp.height;
-        inputCtx.drawImage(bmp, 0, 0);
-        outputCtx.clearRect(0, 0, bmp.width, bmp.height);
-        runBtn.disabled = false;
-        downloadBtn.disabled = true;
-        loaded = true;
+        if (!file.type.startsWith('image/')) {
+          setStatus('Please choose a PNG, JPEG, GIF, or other browser-supported image file.', 'error');
+          return;
+        }
+
+        setStatus('Loading image…');
+        try {
+          const bmp = await decodeFileToImageBitmap(file);
+          inputCanvas.width = bmp.width;
+          inputCanvas.height = bmp.height;
+          outputCanvas.width = bmp.width;
+          outputCanvas.height = bmp.height;
+          inputCtx.drawImage(bmp, 0, 0);
+          outputCtx.clearRect(0, 0, bmp.width, bmp.height);
+          showReadyState(file, bmp);
+        } catch (err) {
+          loaded = false;
+          setStatus(`Could not load that image. ${err?.message ?? 'Try a different file.'}`, 'error');
+        }
       }
 
       fileInput.addEventListener('change', async (e) => {
@@ -123,14 +257,31 @@
 
       runBtn.addEventListener('click', () => {
         if (!loaded) return;
-        const seed = Number.parseInt(seedInput.value, 10) || 42;
-        const src = inputCtx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
-        const out = warpMoshImageData(src, { seed });
-        outputCtx.putImageData(out, 0, 0);
-        downloadBtn.disabled = false;
+        runBtn.disabled = true;
+        setStatus('Moshing image…');
+
+        requestAnimationFrame(() => {
+          try {
+            const seed = Number.parseInt(seedInput.value, 10) || 42;
+            const src = inputCtx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
+            const out = warpMoshImageData(src, { seed });
+            outputCtx.putImageData(out, 0, 0);
+            moshed = true;
+            outputPanel.classList.remove('hidden');
+            downloadBtn.classList.remove('hidden');
+            setStatus(`Finished moshing with seed ${seed}. Review the before/after previews or download the result.`, 'success');
+          } catch (err) {
+            moshed = false;
+            downloadBtn.classList.add('hidden');
+            setStatus(`Moshing failed. ${err?.message ?? 'Try a smaller image or a different file.'}`, 'error');
+          } finally {
+            runBtn.disabled = false;
+          }
+        });
       });
 
       downloadBtn.addEventListener('click', () => {
+        if (!moshed) return;
         const a = document.createElement('a');
         a.href = outputCanvas.toDataURL('image/png');
         a.download = 'warped_datamosh_bitmap.png';
