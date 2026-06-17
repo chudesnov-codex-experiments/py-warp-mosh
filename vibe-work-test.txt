@@ -1,0 +1,5 @@
+This is a test file created by Vibe Work to verify write access to the py-warp-mosh repository via the GitHub connector.
+
+Timestamp: 2026-06-17T18:16:52.705Z
+Source: Vibe Work session
+Branch: vibe/demo-write-access-1781720896
