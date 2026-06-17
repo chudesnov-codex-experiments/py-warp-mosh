@@ -1,5 +1,6 @@
 name: build-binaries
 
+# Demo edit: Vibe Code write access test (SAN-6)
 on:
   push:
     branches: ["main"]
