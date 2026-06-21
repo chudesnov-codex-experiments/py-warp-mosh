@@ -14,8 +14,8 @@ def test_main_without_args_prints_help(capsys):
 def test_main_single_input_uses_default_output(monkeypatch, tmp_path, capsys):
     calls = []
 
-    def fake_processor(input_path: Path, output_path: Path, seed: int) -> Path:
-        calls.append((input_path, output_path, seed))
+    def fake_processor(input_path: Path, output_path: Path, seed: int, intensity: float = 0.5) -> Path:
+        calls.append((input_path, output_path, seed, intensity))
         return output_path
 
     monkeypatch.setattr(cli, "_default_processor", fake_processor)
@@ -29,6 +29,7 @@ def test_main_single_input_uses_default_output(monkeypatch, tmp_path, capsys):
             input_path,
             tmp_path / "photo_warped_datamosh_bitmap.png",
             7,
+            0.5,
         )
     ]
     assert "Saved:" in capsys.readouterr().out

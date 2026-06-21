@@ -4,10 +4,10 @@ import argparse
 from pathlib import Path
 
 
-def _default_processor(input_path: Path, output_path: Path, seed: int) -> Path:
+def _default_processor(input_path: Path, output_path: Path, seed: int, intensity: float = 0.5) -> Path:
     from py_warp_mosh.core import WarpMoshConfig, warp_mosh_image
 
-    return warp_mosh_image(input_path, output_path, WarpMoshConfig(seed=seed))
+    return warp_mosh_image(input_path, output_path, WarpMoshConfig(seed=seed, intensity=intensity))
 
 
 def default_output_path(input_path: Path) -> Path:
@@ -27,6 +27,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("-o", "--output", type=Path, help="Explicit output path (single input only)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for deterministic effect")
+    parser.add_argument("--intensity", type=float, default=0.5, help="Effect intensity from 0.0 (none) to 1.0 (max)")
     return parser
 
 
@@ -49,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
         jobs.extend((input_path, default_output_path(input_path)) for input_path in args.paths)
 
     for input_path, output_path in jobs:
-        outfile = _default_processor(input_path, output_path, args.seed)
+        outfile = _default_processor(input_path, output_path, args.seed, args.intensity)
         print(f"Saved: {outfile}")
 
     return 0
