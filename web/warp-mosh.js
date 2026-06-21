@@ -108,6 +108,12 @@ export function warpMoshImageData(imageData, { seed = 42, intensity = 0.5 } = {}
   const rand = createMulberry32(seed);
 
   const I = Math.min(1.0, Math.max(0.0, intensity));
+
+  // Intensity 0 means "no effect": return the image unchanged.
+  if (I <= 0) {
+    return new ImageData(new Uint8ClampedArray(data), width, height);
+  }
+
   const D = Math.min(width, height);
 
   const arr = new Uint8Array(width * height * 3);

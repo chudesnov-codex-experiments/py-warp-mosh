@@ -270,7 +270,8 @@
         requestAnimationFrame(() => {
           try {
             const seed = Number.parseInt(seedInput.value, 10) || 42;
-            const intensity = Math.min(1, Math.max(0, Number.parseFloat(intensityInput.value) || 0.5));
+            const parsedIntensity = Number.parseFloat(intensityInput.value);
+            const intensity = Math.min(1, Math.max(0, Number.isNaN(parsedIntensity) ? 0.5 : parsedIntensity));
             const src = inputCtx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
             const out = warpMoshImageData(src, { seed, intensity });
             outputCtx.putImageData(out, 0, 0);

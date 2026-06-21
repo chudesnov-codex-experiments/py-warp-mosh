@@ -29,6 +29,13 @@ def warp_mosh_image(infile: str | Path, outfile: str | Path, config: WarpMoshCon
     rng = np.random.default_rng(cfg.seed)
 
     I = float(min(1.0, max(0.0, cfg.intensity)))
+
+    # Intensity 0 means "no effect": pass the image through unchanged.
+    if I <= 0.0:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        img.save(output_path)
+        return output_path
+
     D = min(w, h)
 
     y = np.arange(h)[:, None]
