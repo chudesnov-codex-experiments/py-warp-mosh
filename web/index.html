@@ -148,6 +148,10 @@
             <span>Seed</span>
             <input id="seed" type="number" value="42" min="0" step="1" />
           </label>
+          <label class="field hidden" id="intensityField">
+            <span>Intensity</span>
+            <input id="intensity" type="range" value="0.5" min="0" max="1" step="0.05" style="width:7rem" />
+          </label>
           <button id="run" class="primary hidden" type="button">Start moshing</button>
           <button id="download" class="hidden" type="button">Download result</button>
         </div>
@@ -176,6 +180,8 @@
       const dropZone = document.getElementById('drop');
       const seedField = document.getElementById('seedField');
       const seedInput = document.getElementById('seed');
+      const intensityField = document.getElementById('intensityField');
+      const intensityInput = document.getElementById('intensity');
       const runBtn = document.getElementById('run');
       const downloadBtn = document.getElementById('download');
       const status = document.getElementById('status');
@@ -200,6 +206,7 @@
         loaded = true;
         moshed = false;
         seedField.classList.remove('hidden');
+        intensityField.classList.remove('hidden');
         runBtn.classList.remove('hidden');
         downloadBtn.classList.add('hidden');
         emptyPreview.classList.add('hidden');
@@ -263,13 +270,14 @@
         requestAnimationFrame(() => {
           try {
             const seed = Number.parseInt(seedInput.value, 10) || 42;
+            const intensity = Math.min(1, Math.max(0, Number.parseFloat(intensityInput.value) || 0.5));
             const src = inputCtx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
-            const out = warpMoshImageData(src, { seed });
+            const out = warpMoshImageData(src, { seed, intensity });
             outputCtx.putImageData(out, 0, 0);
             moshed = true;
             outputPanel.classList.remove('hidden');
             downloadBtn.classList.remove('hidden');
-            setStatus(`Finished moshing with seed ${seed}. Review the before/after previews or download the result.`, 'success');
+            setStatus(`Finished moshing with seed ${seed}, intensity ${intensity.toFixed(2)}. Review the before/after previews or download the result.`, 'success');
           } catch (err) {
             moshed = false;
             downloadBtn.classList.add('hidden');
