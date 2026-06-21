@@ -61,3 +61,62 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  pr-preview-surge:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install surge
+        run: npm install -g surge
+
+      - name: Deploy to surge.sh
+        run: surge ./web py-warp-mosh-pr-${{ github.event.pull_request.number }}.surge.sh
+        env:
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+
+      - name: Write preview URL to step summary
+        run: |
+          echo "### Web demo preview" >> $GITHUB_STEP_SUMMARY
+          echo "https://py-warp-mosh-pr-${{ github.event.pull_request.number }}.surge.sh" >> $GITHUB_STEP_SUMMARY
+
+      - name: Post or update PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- surge-preview -->';
+            const url = `https://py-warp-mosh-pr-${{ github.event.pull_request.number }}.surge.sh`;
+            const body = `${marker}\n🌐 Web demo preview: ${url}`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.pull_request.number }},
+            });
+            const existing = comments.find(
+              c => c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: ${{ github.event.pull_request.number }},
+                body,
+              });
+            }
