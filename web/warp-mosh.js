@@ -311,8 +311,8 @@ export function warpMoshImageData(imageData, { seed = 42, intensity = 0.5 } = {}
     }
   }
 
-  // STAGE 11 — final posterize
-  const step = Math.max(1, Math.round(6 + 8 * (1 - I)));
+  // STAGE 11 — final posterize (coarser with higher intensity)
+  const step = Math.max(1, Math.round(16 * I));
   for (let i = 0; i < final3.length; i++) {
     final3[i] = clampByte(Math.round(final3[i] / step) * step);
   }

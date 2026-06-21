@@ -22,19 +22,22 @@ def warp_mosh_image(infile: str | Path, outfile: str | Path, config: WarpMoshCon
     input_path = Path(infile)
     output_path = Path(outfile)
 
-    img = Image.open(input_path).convert("RGB")
-    arr = np.array(img).astype(np.uint8)
-    h, w, _ = arr.shape
-
-    rng = np.random.default_rng(cfg.seed)
+    img = Image.open(input_path)
 
     I = float(min(1.0, max(0.0, cfg.intensity)))
 
-    # Intensity 0 means "no effect": pass the image through unchanged.
+    # Intensity 0 means "no effect": pass the image through unchanged,
+    # preserving the original mode (including any alpha channel).
     if I <= 0.0:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         img.save(output_path)
         return output_path
+
+    img = img.convert("RGB")
+    arr = np.array(img).astype(np.uint8)
+    h, w, _ = arr.shape
+
+    rng = np.random.default_rng(cfg.seed)
 
     D = min(w, h)
 
@@ -185,8 +188,8 @@ def warp_mosh_image(infile: str | Path, outfile: str | Path, config: WarpMoshCon
         band = np.roll(final[y0 : y0 + bh], shift, axis=1)
         final[y0 : y0 + bh] = np.clip(0.85 * final[y0 : y0 + bh] + 0.15 * band, 0, 255)
 
-    # STAGE 11 — final posterize
-    step = max(1, int(round(6 + 8 * (1 - I))))
+    # STAGE 11 — final posterize (coarser with higher intensity)
+    step = max(1, int(round(16 * I)))
     final = (np.round(final / step) * step).clip(0, 255).astype(np.uint8)
 
     out = Image.fromarray(final, "RGB")
